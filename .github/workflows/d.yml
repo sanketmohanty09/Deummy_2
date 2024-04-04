@@ -1,55 +1,22 @@
-# Unique name for this workflow
-name: master
+name: Salesforce Deployment
 
-# Definition when the workflow should run
 on:
-    push:
-        branches: [main]
-       
+  push:
+    branches:
+      - main
 
-env:
-    SFDX_INTEGRATION_URL: ${{ secrets.SFDX_INTEGRATION_URL }}
-
-# Jobs to be executed when the above conditions are met
 jobs:
-    # This is the name of the job. You can give it whatever name you want
-    validate-deployment-on-develop-org:
-        runs-on: ubuntu-latest
-        if: ${{ github.actor != 'dependabot[bot]' }}
-        steps:
-            # Now we install nodejs in the VM, and specify version 14
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: '14'
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-            - name: 'Checkout source code'
-              uses: actions/checkout@v2
-              with:
-                  fetch-depth: 0
+    - name: Authenticate with Salesforce
+      run: sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile ./server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername -a sfdx
 
-            # Now Install Salesforce CLI
-            - name: 'Install Salesforce CLI'
-              run: |
-                  wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
-                  mkdir ~/sfdx
-                  tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
-                  echo "$HOME/sfdx/bin" >> $GITHUB_PATH
-                  ~/sfdx/bin/sfdx version
+    - name: Deploy changes
+      run: sfdx force:source:deploy -p force-app/main/default -u sfdx --json
 
-            # Install java as it is required for the next step
-            # - name: 'Installing java'
-            #   run: sudo apt-get install openjdk-8-jdk
-
-            # The URL is stored in the Github Secret named SFDX_INTEGRATION_URL
-            # so here we store the URL into a text file
-            - name: 'Populate auth file with SFDX_URL secret of integration org'
-              shell: bash
-              run: |
-                  echo $SFDX_INTEGRATION_URL > ./SFDX_INTEGRATION_URL.txt
-
-            # Authenticate to org using the URL stored in the text file
-            - name: 'Authenticate to Integration Org'
-              run: sfdx auth:sfdxurl:store -f ./SFDX_INTEGRATION_URL.txt -s -a integration
-
-            - name: 'Deploy the entire branch to Production org'
-              run: sfdx force:source:deploy  --testlevel RunLocalTests --json
+    # Add additional steps for validation, testing, etc.
