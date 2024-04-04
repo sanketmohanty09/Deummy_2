@@ -1,0 +1,54 @@
+<template>
+    <lightning-card>
+        <h3 slot="title">
+            <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
+            Student Search.
+        </h3>
+
+        <p class="search-bar slds-p-horizontal_small">
+            <lightning-input
+                type="search"
+                class="slds-m-bottom_small"
+                label="Search Student Name"
+                onchange={searchStudentAction}
+                value={studentName}
+            ></lightning-input>
+        </p>
+         <!-- Next button to send the selected students -->
+         <div class="search-button slds-p-horizontal_small">
+            <lightning-button label="Submit" variant="brand" onclick={handleStudentNext}></lightning-button>
+        </div>
+
+        <div class="slds-p-around--medium">
+            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;" class="lwsTablePad">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                    </tr>
+                </thead>
+                <template for:each={studentList} for:item="stuObj" for:index="index">
+                    <tbody key={stuObj.Id}>
+                        <tr>
+                            <td>
+                                <lightning-input
+                                    type="checkbox"
+                                    name={stuObj.Id}
+                                    onchange={handleCheckboxChange}
+                                ></lightning-input>
+                            </td>
+                            <td>{stuObj.Student_Name__c}</td>
+                            <td>{stuObj.Level__c}</td>
+                        </tr>
+                    </tbody>
+                </template>
+            </table>
+        </div>
+        
+        
+
+    </lightning-card>
+</template>
+
+
