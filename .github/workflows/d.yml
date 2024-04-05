@@ -13,17 +13,19 @@ jobs:
         with:
           fetch-depth: 0
           
-      # Debug Node.js and npm versions
-      
-
+      # Download Salesforce CLI
       - name: Download Salesforce CLI
         run: |
           wget -qO sfdx.tar.xz https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
           mkdir sfdx
           tar xJf sfdx.tar.xz -C sfdx --strip-components 1
           sudo mv sfdx /usr/local/lib/
-          sudo ln -s /usr/local/lib/sfdx/bin/sfdx /usr/bin/sfdx  
+          sudo ln -s /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
         
+      # Ensure sfdx is added to PATH
+      - name: Add Salesforce CLI to PATH
+        run: echo 'export PATH=$PATH:/usr/local/bin/sfdx/bin' >> $HOME/.bashrc && source $HOME/.bashrc
+
       # Create server key file
       - name: Create server key file
         run: |
@@ -32,13 +34,8 @@ jobs:
           
       # Authorization with DevHub
       - name: Authorize DevHub
-        run: sf org login jwt --json --alias DevHub 
-                --set-default --set-default-dev-hub 
-                --username "${{ secrets.SF_CICD_USERNAME }}" 
-                --keyfile /home/runner/work/game-force/game-force/server.key 
-                --clientid ${{ secrets.SF_CLIENT_SECRET }}
+        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.SF_CLIENT_ID }} --username "${{ secrets.SF_CICD_USERNAME }}" --jwtkeyfile server.key --setdefaultdevhubusername --instanceurl https://login.salesforce.com
 
       # Deploy changes
       - name: Deploy changes
         run: sfdx force:source:deploy -p force-app/main/default -u sfdx --json
-
