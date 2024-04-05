@@ -37,4 +37,4 @@ jobs:
         run:  sfdx force:auth:jwt:grant --clientid "${{ secrets.SF_CLIENT_ID }}" --username "${{ secrets.SF_CICD_USERNAME }}" --jwtkeyfile server.key --setdefaultdevhubusername --instanceurl https://login.salesforce.com
       # Deploy changes
       - name: Deploy changes
-        run: sfdx force:source:deploy  -u sfdx --json
+        run: sfdx force:source:deploy -p force-app/main/default -u sfdx --json
