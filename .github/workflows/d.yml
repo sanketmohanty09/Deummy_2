@@ -18,8 +18,11 @@ jobs:
 
       - name: Download Salesforce CLI
         run: |
-          wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz | tar xJf -
-          sudo ./sfdx/install  
+          wget -qO sfdx.tar.xz https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
+          mkdir sfdx
+          tar xJf sfdx.tar.xz -C sfdx --strip-components 1
+          sudo mv sfdx /usr/local/lib/
+          sudo ln -s /usr/local/lib/sfdx/bin/sfdx /usr/bin/sfdx  
         
       # Create server key file
       - name: Create server key file
