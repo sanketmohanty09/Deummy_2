@@ -1,5 +1,4 @@
 name: PR Checks
-run-name: Checks running whenever new PR is created
 on: 
   push:
     branches:
@@ -13,23 +12,28 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      # We need to install NPM so that we can install SFDX CLI tools
+          
+      # Debug Node.js and npm versions
+      - name: Debug Node.js and npm versions
+        run: |
+          node -v
+          npm -v
+
+      # Install NPM
       - name: Install NPM
-        run: |
-          npm install  
-      # Isntalling SFDX CLI
+        run: npm install  
+
+      # Installing SFDX CLI
       - name: Install the SFDX CLI
-        run: |
-          npm install @salesforce/cli --global  
-      # We need to use a key value stored as GitHub secret and 
-      # create a .key file since 'sf org login jwt' command expects a path 
-      # to .key file as a parameter
+        run: npm install @salesforce/cli --global  
+        
+      # Create server key file
       - name: Create server key file
         run: |
           touch server.key
           echo -e "${{ secrets.SF_CICD_SERVERKEY }}" >> server.key  
-      # Authorization with DevHub. Notice that all critical values are
-      # used from the GitHub secrets storage and aren't public
+          
+      # Authorization with DevHub
       - name: Authorize DevHub
         run: sf org login jwt --json --alias DevHub 
                 --set-default --set-default-dev-hub 
@@ -37,5 +41,7 @@ jobs:
                 --keyfile /home/runner/work/game-force/game-force/server.key 
                 --clientid ${{ secrets.SF_CLIENT_SECRET }}
 
+      # Deploy changes
       - name: Deploy changes
         run: sfdx force:source:deploy -p force-app/main/default -u sfdx --json
+
