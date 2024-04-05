@@ -34,7 +34,11 @@ jobs:
           
       # Authorization with DevHub
       - name: Authorize DevHub
-        run:  sfdx force:auth:jwt:grant --clientid "${{ secrets.SF_CLIENT_ID }}" --username "${{ secrets.SF_CICD_USERNAME }}" --jwtkeyfile server.key --setdefaultdevhubusername --instanceurl https://login.salesforce.com
+        run:  sf org login jwt --json --alias DevHub 
+                --set-default --set-default-dev-hub 
+                --username "${{ secrets.SF_CICD_USERNAME }}" 
+                --keyfile /home/runner/work/game-force/game-force/server.key 
+                --clientid ${{ secrets.SF_CLIENT_SECRET }}
 
       # Deploy changes
       - name: Deploy changes
